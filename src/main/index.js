@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron' // eslint-disable-line
-import { Updater } from './update/updater.js';
+import Updater from './update/updater.js';
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -13,7 +13,6 @@ let updater;
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
-
 
 function createWindow() {
   /**
@@ -69,6 +68,7 @@ function createWindow() {
 app.on('ready', () => {
   app.setName('SPlayerX');
   createWindow();
+  console.log();
   updater = Updater.getInstance(mainWindow, app);
   updater.onStart().then();
 });

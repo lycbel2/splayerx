@@ -1,11 +1,13 @@
+import UpdateStorageHelper from './UpdateHelper.js';
+import { ipcMain } from 'electron'; // eslint-disable-line
+console.log(UpdateStorageHelper);
 const Promise = require('bluebird');
 const { CancellationToken } = require('electron-builder-http');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
 const autoUpdateString = 'autoUpdatString_random_olapxsdf#@%';
-// const { ipcMain } = require('electron');
-const { UpdateStorageHelper } = require('../../../../../../learn/electron-updater-example/UpdateHelper.js');
 const updateStorageHelper = new UpdateStorageHelper(autoUpdateString);
+let backObjT;
 function setAutoUpdater() {
   autoUpdater.autoDownload = true; // when the update is available, it will download automatically
   // if user does not install downloaded app, it will auto install when quit the app
@@ -16,6 +18,8 @@ const UpdaterFactory = (function () {
   let instance = null;
   class Updater {
     constructor(window, app) {
+      backObjT = this;
+      this.alreadyInUpdate = false;
       this.menuallyStarted = false;
       this.cancellationToken = new CancellationToken();
       this.hasUpdate = null;
@@ -28,9 +32,14 @@ const UpdaterFactory = (function () {
     }
     // it should be called when the app starts
     onStart() {
+      ipcMain.on('update-back', (event, arg) => { // arg true/false
+        console.log(arg);
+        this.sendStatusToWindow(backObjT.app.getVersion());
+      });
       return new Promise((resolve) => {
         setAutoUpdater();
         updateStorageHelper.getStrategyStorage().then(() => {
+          console.log('hello lyc');
           if (updateStorageHelper.getAutoCheck) {
             resolve(this.startUpdateCheck());
           } else {
@@ -46,9 +55,9 @@ const UpdaterFactory = (function () {
     }
     // it should be called when user check update manually
     startUpdateManually() {
-      const backObj = this;
+      const backObjT = this;
       return new Promise((resolve) => {
-        backObj.menuallyStarted = true;
+        backObjT.menuallyStarted = true;
         resolve(this.startUpdateCheck());
       });
     }
@@ -101,17 +110,19 @@ const UpdaterFactory = (function () {
     }
 
 
-    // registerMessageHandlerForIPCMain(backObj) {
-    //   ipcMain.on('cancel-update', (event, arg) => {
-    //
-    //   });
-    //   ipcMain.on('update-setting', (event, arg) => { // arg {'':bool,'':bool....}
-    //
-    //   });
-    //   ipcMain.on('quit-install-now', (event, arg) => { // arg true/false
-    //
-    //   });
-    // }
+    registerMessageHandlerForIPCMain(backObj) {
+      backObj = this;
+      ipcMain.on('cancel-update', (event, arg) => {
+        console.log(arg);
+        backObj.cancelUpdate();
+      });
+      ipcMain.on('update-setting', (event, arg) => { // arg {'':bool,'':bool....}
+        console.log(arg);
+      });
+      ipcMain.on('quit-install-now', (event, arg) => { // arg true/false
+        console.log(arg);
+      });
+    }
     // isUpdateProper(updateInfo) {
     //   // todo
     // }
@@ -137,5 +148,5 @@ const UpdaterFactory = (function () {
     },
   };
 }());
-exports.Updater = UpdaterFactory;
+export { UpdaterFactory as default };
 

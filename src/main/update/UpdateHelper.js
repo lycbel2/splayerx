@@ -5,9 +5,11 @@ const defultStorageSetting = { autoCheck: true, askDownload: false, askQuitInsta
 function isUndefined(object) {
   return typeof object !== 'undefined';
 }
-class UpdateStorageHelper {
+
+export default class UpdateStorageHelper {
   constructor(updaterStrategyString) {
     this.uss = updaterStrategyString;
+    console.log(this.uss);
     this.strategy = null;
     // in format {'autoCheck':bool,'askDownload':bool,'askQuitInstall':bool} default true,false,true
     this.updateStrategy = null;
@@ -37,6 +39,8 @@ class UpdateStorageHelper {
     return new Promise((resolve, reject) => {
       storage.get(this.uss, (err, data) => {
         if (err) {
+          const logMessage = `Download speed: ${this.uss}`;
+          console.log(logMessage);
           // todo when err maybe need a temp setting
           reject(err);
         } else if (isUndefined(data) || data == null) {
@@ -57,5 +61,4 @@ class UpdateStorageHelper {
     return storage.setAsync(this.uss, JSON.stringify(this.updateStrategy));
   }
 }
-exports.UpdateStorageHelper = UpdateStorageHelper;
 
