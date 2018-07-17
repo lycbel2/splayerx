@@ -1,5 +1,5 @@
 <template>
-    <div class="content">
+    <div class="content" ref="showWindow">
         {{content}}
     </div>
 </template>
@@ -22,9 +22,13 @@
         this.content += text;
       });
     },
+    updated() {
+      const elem = this.$refs.showWindow;
+      elem.scrollTop = elem.clientHeight;
+    },
     methods: {
       doSome() {
-        this.content = 'dddd';
+        this.content = '';
       },
     },
   };
@@ -34,10 +38,11 @@
 .content {
     position: absolute;
     width: 100px;
-    height: 100px;
+    height: 100%;
     z-index: 5;
     top: 0px;
     left: 0px;
+    overflow: scroll;
 
 }
 </style>

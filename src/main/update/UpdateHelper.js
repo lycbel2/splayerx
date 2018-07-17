@@ -6,31 +6,29 @@ function isUndefined(object) {
   return typeof object !== 'undefined';
 }
 
-export default class UpdateStorageHelper {
+export default class UpdateStrategyHelper {
   constructor(updaterStrategyString) {
     this.uss = updaterStrategyString;
-    console.log(this.uss);
-    this.strategy = null;
     // in format {'autoCheck':bool,'askDownload':bool,'askQuitInstall':bool} default true,false,true
     this.updateStrategy = null;
   }
-  get getAutoCheck() {
+  get AutoCheck() {
     return this.updateStrategy.autoCheck;
   }
-  get getAskDownload() {
+  get AskDownload() {
     return this.updateStrategy.askDownload;
   }
-  get getAskQuitInstall() {
+  get AskQuitInstall() {
     return this.updateStrategy.askQuitInstall;
   }
 
-  set setAutoCheck(bool) {
+  set AutoCheck(bool) {
     this.updateStrategy.autoCheck = bool;
   }
-  set setAskDownload(bool) {
+  set AskDownload(bool) {
     this.updateStrategy.askDownload = bool;
   }
-  set setAskQuitInstall(bool) {
+  set AskQuitInstall(bool) {
     this.updateStrategy.askQuitInstall = bool;
   }
 
@@ -47,7 +45,7 @@ export default class UpdateStorageHelper {
           backOb.updateStrategy = defultStorageSetting;
           resolve();
         } else {
-          backOb.updateStrategy = UpdateStorageHelper.getStrategyFromString(data);
+          backOb.updateStrategy = UpdateStrategyHelper.getStrategyFromString(data);
           resolve();
         }
       });
@@ -57,7 +55,7 @@ export default class UpdateStorageHelper {
   static getStrategyFromString(strategyString) {
     return JSON.parse(strategyString);
   }
-  setStrategyStorage() {
+  storeToLocal() {
     return storage.setAsync(this.uss, JSON.stringify(this.updateStrategy));
   }
 }

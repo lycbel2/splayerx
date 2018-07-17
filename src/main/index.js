@@ -70,7 +70,7 @@ app.on('ready', () => {
   createWindow();
   console.log();
   updater = Updater.getInstance(mainWindow, app);
-  updater.onStart().then();
+  updater.onStart().then((err) => { console.log(err); });
 });
 
 app.on('window-all-closed', () => {
@@ -82,5 +82,6 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
+    updater.Window = mainWindow;
   }
 });
