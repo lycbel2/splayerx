@@ -8,8 +8,10 @@ const { autoUpdater } = require('electron-updater');
 const autoUpdateString = 'autoUpdatString_random_olapxsdf#@%';
 let THIS;
 
+
 function setAutoUpdater() {
-  autoUpdater.autoDownload = true; // when the update is available, it will download automatically
+  // when the update is available, it will not download automatically
+  autoUpdater.autoDownload = false;
   // if user does not install downloaded app, it will auto install when quit the app
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowDowngrade = false;
@@ -64,7 +66,7 @@ const UpdaterFactory = (function () {
 
     // todo for now no such concern
     cancelUpdate() {
-      return autoUpdater.downloadUpdate(this.cancellationToken); // return promise
+      this.cancellationToken.cancel();
     }
 
     startUpdateCheck() {
@@ -96,34 +98,62 @@ const UpdaterFactory = (function () {
       autoUpdater.on('checking-for-update', () => {
         this.sendStatusToWindow('Checking for update...');
       });
+
       autoUpdater.on('update-available', (info) => {
         log.info(`update available ${JSON.stringify(info)}`);
+        THIS.sendStatusToWindow(JSON.stringify(info));
         if (THIS.isUpdateProper(info)) {
           THIS.hasUpdate = true;
           this.sendStatusToWindow(`${JSON.stringify(info)}Update available.`);
+          if (THIS.updateStrategyHelper.AskDownload || THIS.menuallyStarted) {
+            // todo multi Language
+            dialog.showMessageBox({
+              type: 'question',
+              buttons: ['Yes', 'No'],
+              title: 'restart app now',
+              message: 'update available wanna install?',
+            }, (response) => {
+              if (response === 0) { // Runs the following if 'Yes' is clicked
+                THIS.app.showExitPrompt = false;
+                autoUpdater.quitAndInstall(true, true);
+              }
+            });
+          } else {
+            autoUpdater.downloadUpdate(THIS.cancellationToken);
+          }
         } else {
           THIS.hasUpdate = false;
         }
       });
+
       autoUpdater.on('update-not-available', (info) => {
         log.info(`update not available ${JSON.stringify(info)}`);
         THIS.hasUpdate = false;
         THIS.alreadyInUpdate = false;
         if (THIS.menuallyStarted) {
+          dialog.showMessageBox({
+            type: 'question',
+            buttons: ['Okay'],
+            title: 'update not available',
+            message: 'update not available',
+          });
           THIS.sendStatusToWindow('update-not-available');
         }
       });
+
       autoUpdater.on('error', (err) => {
         log.info(`update available ${err.stack}`);
         THIS.alreadyInUpdate = false;
         THIS.sendStatusToWindow(`error-in-auto-updater#${err}`);
       });
+
       autoUpdater.on('download-progress', (progressObj) => {
         let logMessage = `download-progress#download-speed:${progressObj.bytesPerSecond}`;
         logMessage = `${logMessage}&download-percentage:${progressObj.percent}%`;
         logMessage = `${logMessage}&download-total:${progressObj.total}`;
         THIS.sendStatusToWindow(logMessage);
       });
+
       autoUpdater.on('update-downloaded', () => {
         log.info('update downloaded');
         if (!THIS.updateStrategyHelper.AskQuitInstall) {
