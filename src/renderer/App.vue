@@ -1,5 +1,8 @@
 <template>
-  <div id="app" class="application">
+  <div id="app" class="application"
+       @mousedown.left.prevent="leftMouseDown"
+       @mouseup.left.prevent="leftMouseUp"
+       @mouseleave="mouseleaveHandler">
     <router-view></router-view>
     <!--lyctest-->
     <UpdaterProgressIndicator> </UpdaterProgressIndicator>
@@ -11,14 +14,19 @@
 <script>
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
+  import DragHelperGetter from './helpers/DragHelper.js';
   export default {
     name: 'splayer',
-    // -> for test todo need delete lyctest
     components: {
       UpdaterProgressIndicator,
       UpdaterNotification,
     },
-    // <-for test todo need delete lyctest
+    data() {
+      return {
+        mainWindow: null,
+        dragHelper: null,
+      };
+    },
     methods: {
       mainCommitProxy(commitType, commitPayload) {
         this.$store.commit(commitType, commitPayload);
@@ -26,6 +34,19 @@
       mainDispatchProxy(actionType, actionPayload) {
         this.$store.dispatch(actionType, actionPayload);
       },
+      leftMouseDown() {
+        this.dragHelper.down();
+      },
+      leftMouseUp() {
+        this.dragHelper.up();
+      },
+      mouseleaveHandler() {
+        this.dragHelper.leave();
+      },
+    },
+    created() {
+      this.mainWindow = this.$electron.remote.getCurrentWindow();
+      this.dragHelper = new (DragHelperGetter())(this.mainWindow, this);
     },
     mounted() {
       /* eslint-disable no-unused-vars */

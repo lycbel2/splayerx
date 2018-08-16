@@ -1,8 +1,8 @@
 <template>
 <div class="wrapper">
   <main
-    @mousedown.left.stop="handleLeftClick"
-    @mouseup.left.stop="handleMouseUp"
+    @mousedown.left="handleLeftClick"
+    @mouseup.left="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
     <transition name="background-container-transition" mode="">
@@ -126,7 +126,7 @@ export default {
       // TODO: proper error handle
       console.error(err);
     });
-    if (process.platform === 'win32') {
+    if (process.platform === 'darwin') { // todo lyc
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
       document.querySelector('.application').style.borderRadius = 0;
     }

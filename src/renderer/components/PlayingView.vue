@@ -7,7 +7,7 @@
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
-      @mousedown.left.stop.prevent="handleLeftClick"
+      @mousedown.left.prevent="handleLeftClick"
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="mouseleaveHandler"
